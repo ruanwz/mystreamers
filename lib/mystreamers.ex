@@ -26,13 +26,21 @@ defmodule Mystreamers do
   end
   defp do_extract_m3u8(pid, acc) do
     case IO.read(pid, :line) do
-      :eof -> nil
+      :eof -> acc
       stream_inf ->
         path = IO.read(pid, :line)
         do_extract_m3u8(pid, stream_inf, path, acc)
     end
   end
   defp do_extract_m3u8(pid, stream_inf, path, acc) do
+    # string in elixir is binary
+    # <<"jos",x::utf8>> = "jos中"
+    "#EXT-X-STREAM-INF:PROGRAM-ID=1,BANDWIDTH=110000"
+    << "#EXT-X-STREAM-INF:PROGRAM-ID=",program_id,",BANDWIDTH=",bandwidth::binary >> = stream_inf
+
+    record = m3u8(program_id: program_id, path: path, bandwidth: bandwidth)
+    acc = [record|acc]
+
   end
 
   defp is_index?(file) do
