@@ -26,7 +26,7 @@ defmodule Mystreamers do
   end
   defp do_extract_m3u8(pid, acc) do
     case IO.read(pid, :line) do
-      :eof -> acc
+      :eof ->Enum.reverse acc
       stream_inf ->
         path = IO.read(pid, :line)
         do_extract_m3u8(pid, stream_inf, path, acc)
@@ -40,6 +40,7 @@ defmodule Mystreamers do
 
     record = m3u8(program_id: program_id, path: path, bandwidth: bandwidth)
     acc = [record|acc]
+    do_extract_m3u8(pid, acc)
 
   end
 

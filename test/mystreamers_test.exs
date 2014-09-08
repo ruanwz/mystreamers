@@ -17,7 +17,7 @@ defmodule MystreamersTest do
   end
   test "extract m3u8 info from index file" do
     m3u8s = Mystreamers.extract_m3u8 @index_file
-    assert Enum.at(m3u8s, 0) == (Mystreamers.m3u8(program_id: 1, bandwidth: 110000, path: "test/fixtures/emberjs/8bda35243c7c0a7fc69ebe1383c6464c.m3u8"))
+    assert Enum.at(m3u8s, 0) == (Mystreamers.m3u8(program_id: ?1, bandwidth: 110000, path: "8bda35243c7c0a7fc69ebe1383c6464c.m3u8"))
 
   end
 
