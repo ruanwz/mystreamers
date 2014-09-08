@@ -5,6 +5,6 @@ defmodule MystreamersTest do
     assert 1 + 1 == 2
   end
   test "find index file" do
-    assert Mystreamers.find_index("fixtures") == "9af0270acb795f9dcafb5c51b1907628"
+    assert Mystreamers.find_index("test/fixtures/emberjs") == "9af0270acb795f9dcafb5c51b1907628.m3u8"
   end
 end
