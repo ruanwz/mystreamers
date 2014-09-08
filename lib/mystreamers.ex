@@ -1,4 +1,6 @@
 defmodule Mystreamers do
+  require Record
+  Record.defrecord :m3u8, program_id: nil, path: nil, bandwidth: nil
   @doc """
   find streaming file in given directory  
 
@@ -9,8 +11,28 @@ defmodule Mystreamers do
   def find_index(dir) do
     files = Path.join(dir,"*.m3u8")
     if file = Enum.find Path.wildcard(files), &is_index?(&1) do
-       Path.basename file
+       file
     end
+  end
+
+  def extract_m3u8(index_file) do
+    # dont read all content into memory, open file in a process
+    File.open! index_file, [:read], fn(pid)->
+      IO.read(pid,:line)
+      # use accumulator
+      do_extract_m3u8(pid, [])
+    end
+
+  end
+  defp do_extract_m3u8(pid, acc) do
+    case IO.read(pid, :line) do
+      :eof -> nil
+      stream_inf ->
+        path = IO.read(pid, :line)
+        do_extract_m3u8(pid, stream_inf, path, acc)
+    end
+  end
+  defp do_extract_m3u8(pid, stream_inf, path, acc) do
   end
 
   defp is_index?(file) do
@@ -21,7 +43,6 @@ defmodule Mystreamers do
       # that is why IO not block in Erlang, because it is concurrently
       IO.read(pid, 25) == "#EXTM3U\n#EXT-X-STREAM-INF"
     end
-
   end
 
 end
