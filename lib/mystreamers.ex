@@ -51,12 +51,31 @@ defmodule Mystreamers do
   process m3u8 records to get ts_files
   """
   def process_m3u8(m3u8s) do
-    Enum.map m3u8s, &do_process_m3u8(&1, self)
+    #Enum.map m3u8s, &do_process_m3u8(&1)
+    Enum.map m3u8s, &do_parallel_process_m3u8(&1, self)
 
+    do_collect_m3u8s(length(m3u8s), [])
+  end
+
+  def do_parallel_process_m3u8(m3u8, parent) do
+    spawn_link(fn ->
+      updated_m3u8 = do_process_m3u8(m3u8)
+      send parent, {:m3u8, updated_m3u8}
+    end)
+  end
+
+  defp do_collect_m3u8s(0, acc) do
+    acc
+  end
+  defp do_collect_m3u8s(count, acc) do
+    receive do
+      {:m3u8,item} ->
+        do_collect_m3u8s(count-1, [item|acc])
+    end
   end
 
   # do pattern matching in params
-  defp do_process_m3u8(m3u8(path: path)=m3u8_rec, parent_pid) do
+  defp do_process_m3u8(m3u8(path: path)=m3u8_rec) do
     #   #EXTM3U
     #   #EXT-X-TARGETDURATION:11
     #   #EXTINF:10,
@@ -67,7 +86,7 @@ defmodule Mystreamers do
       #skip line2
       IO.read(pid,:line)
       ts_files = do_process_m3u8(pid,[])
-      m3u8(m3u8, path: path, ts_files: ts_files)
+      m3u8(m3u8_rec, path: path, ts_files: ts_files)
     end
   end
   defp do_process_m3u8(pid, acc) do
@@ -91,7 +110,6 @@ defmodule Mystreamers do
       IO.read(pid, 25) == "#EXTM3U\n#EXT-X-STREAM-INF"
     end
   end
-
 end
     # everything in elixir like a keyword, need to use do block
     # if is a macro, not a keyword
