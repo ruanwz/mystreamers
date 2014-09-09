@@ -38,7 +38,7 @@ defmodule Mystreamers do
     "#EXT-X-STREAM-INF:PROGRAM-ID=1,BANDWIDTH=110000"
     << "#EXT-X-STREAM-INF:PROGRAM-ID=",program_id,",BANDWIDTH=",bandwidth::binary >> = stream_inf
 
-    record = m3u8(program_id: program_id, path: path, bandwidth: bandwidth)
+    record = m3u8(program_id: program_id - ?0, path: String.strip(path), bandwidth: (bandwidth |> String.strip |> String.to_integer))
     acc = [record|acc]
     do_extract_m3u8(pid, acc)
 
